@@ -38,9 +38,28 @@ fn main() {
 
         // **OPTION**
         // Brighten -- see the brighten() function below
+        "brighten" => {
+            if args.len() != 2 {
+                print_usage_and_exit();
+            }
+            let infile = args.remove(0);
+            let outfile = args.remove(0);
+            brighten(infile, outfile);
+        }
 
         // **OPTION**
         // Crop -- see the crop() function below
+        "crop" => {
+            if args.len() != 6 {
+                print_usage_and_exit();
+                let (infile, outfile) = (args.remove(0), args.remove(0));
+                let x = args.remove(0).parse().unwrap();
+                let y = args.remove(0).parse().unwrap();
+                let width = args.remove(0).parse().unwrap();
+                let height = args.remove(0).parse().unwrap();
+                crop(infile, outfile, x, y, width, height );
+            }
+        }
 
         // **OPTION**
         // Rotate -- see the rotate() function below
@@ -55,6 +74,13 @@ fn main() {
         // Generate -- see the generate() function below
 
         // ANOTHER EXAMPLE...a really fun one. :-)
+        "generate" => {
+            if args.len() != 1 {
+                print_usage_and_exit();
+            }
+            let outfile = args.remove(0);
+            generate(outfile);
+        }
         "fractal" => {
             if args.len() != 1 {
                 print_usage_and_exit();
@@ -89,6 +115,9 @@ fn main() {
 fn print_usage_and_exit() {
     println!("USAGE (when in doubt, use a .png extension on your filenames)");
     println!("blur INFILE OUTFILE");
+    println!("brighten INFILE OUTFILE");
+    println!("crop INFILE OUTFILE x y width height");
+    println!("fractal OUTFILE");
     // **OPTION**
     // Print useful information about what subcommands and arguments you can use
     // println!("...");
@@ -111,12 +140,15 @@ fn brighten(infile: String, outfile: String) {
 
     // .brighten() takes one argument, an i32.  Positive numbers brighten the
     // image. Negative numbers darken it.  It returns a new image.
+    let img = image::open(infile).expect("Failed to open INFILE.");
+    let img2 = img.brighten(50);
+    img2.save(outfile).expect("crash save outfile");
 
     // Challenge: parse the brightness amount from the command-line and pass it
     // through to this function.
 }
 
-fn crop(infile: String, outfile: String) {
+fn crop(infile: String, outfile: String, x: u32, y: u32, width : u32, height : u32) {
     // See blur() for an example of how to open an image.
 
     // .crop() takes four arguments: x: u32, y: u32, width: u32, height: u32
@@ -126,6 +158,10 @@ fn crop(infile: String, outfile: String) {
     // through to this function.
 
     // See blur() for an example of how to save the image.
+    let mut img = image::open(infile).unwrap();
+    let img2 = img.crop(x, y, width, height);
+    img2.save(outfile).unwrap();
+
 }
 
 fn rotate(infile: String, outfile: String) {
@@ -167,6 +203,10 @@ fn generate(outfile: String) {
 
     // Iterate over the coordinates and pixels of the image -- see fractal() for an example
 
+    let imgbuf = image::ImageBuffer::new(800, 800);
+    for (x, y, pixel)  in imgbuf.enumerate_pixels_mut() {
+        *pixel = image::Rgb([0.1, 0.5, 1.0]);
+    }
     // Set the image to some solid color. -- see fractal() for an example
 
     // Challenge: parse some color data from the command-line, pass it through
@@ -174,7 +214,8 @@ fn generate(outfile: String) {
 
     // Challenge 2: Generate something more interesting!
 
-    // See blur() for an example of how to save the image
+    // See blur() for an example of how to save the
+    imgbuf.save(outfile).unwrap();;
 }
 
 // This code was adapted from https://github.com/PistonDevelopers/image
